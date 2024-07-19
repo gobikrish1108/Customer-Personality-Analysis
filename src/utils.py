@@ -1,75 +1,38 @@
-import pandas as pd
-import os
-import sys
-from src.logger import logging
-from src.exception import CustomException
-from sklearn.metrics import silhouette_score
-import numpy as np
-from sklearn.cluster import KMeans
 import pickle
+import os
+import logging
 
-def save_object(file_path, obj):
+def save_object(file_path: str, obj):
+    """Save an object to a file."""
     try:
-        dir_path = os.path.dirname(file_path)
-
-        os.makedirs(dir_path, exist_ok=True)
-
-        with open(file_path, "wb") as file_obj:
-            pickle.dump(obj, file_obj)
-
+        # Ensure the directory exists
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        logging.debug(f"Saving object to {file_path}")
+        with open(file_path, 'wb') as file:
+            pickle.dump(obj, file)
+        logging.info(f'Successfully saved object to {file_path}')
     except Exception as e:
-        raise CustomException(e, sys)
+        logging.error(f'Error occurred while saving object to {file_path}: {e}')
+        raise
 
-def load_object(file_path):
+def load_object(file_path: str):
+    """Load an object from a file."""
     try:
-        with open(file_path,'rb') as file_obj:
-            return pickle.load(file_obj)
+        logging.debug(f"Loading object from {file_path}")
+        with open(file_path, 'rb') as file:
+            obj = pickle.load(file)
+        logging.info(f'Successfully loaded object from {file_path}')
+        return obj
     except Exception as e:
-        logging.info('Exception occurred in load_object function')
-        raise CustomException(e,sys)
+        logging.error(f'Error occurred while loading object from {file_path}: {e}')
+        raise
 
-def calculate_scores(train_array, num_clusters):
-    # Apply KMeans clustering to the training data
-    kmeans = KMeans(n_clusters=num_clusters, random_state=42)
-    clusters = kmeans.fit_predict(train_array)
-
-    # Compute the silhouette score for the clusters
-    silhouette_avg = silhouette_score(train_array, clusters)
-
-    # Determine the size of each cluster
-    cluster_sizes = [np.sum(clusters == i) for i in range(num_clusters)]
-
-    # Calculate the Soliot score as the ratio of the smallest to the largest cluster size
-    soliot_score = min(cluster_sizes) / max(cluster_sizes)
-
-    return silhouette_avg, soliot_score
-
-class DataProcessor:
-    def __init__(self, db_url=None):
-        self.db_url = db_url
+def calculate_scores(data, num_clusters):
+    """Calculate Soliot and silhouette scores (placeholder function)."""
+    from sklearn.metrics import silhouette_score
     
-    def save_dataframe(self, df, file_name):
-        try:
-            file_path = os.path.join('notebook', 'data', f'{file_name}.csv')
-            df.to_csv(file_path, index=False)
-            logging.info(f"DataFrame successfully saved as '{file_path}'")
-        except Exception as e:
-            raise CustomException(e, sys)
-            logging.error(f"An error occurred: {str(e)}")
+    # Placeholder implementation - Replace with actual scoring logic
+    silhouette_avg = silhouette_score(data, num_clusters)
+    soliot_score = silhouette_avg  # Placeholder, replace with actual Soliot score calculation
 
-    def load_dataframe(self, file_name):
-        try:
-            file_path = os.path.join('notebook', 'data', f'{file_name}.csv')
-            df = pd.read_csv(file_path)
-            return df
-        except Exception as e:
-            raise CustomException(e, sys)
-            logging.error(f"An error occurred: {str(e)}")
-            return None  # Return None to indicate an error
-
-    def close(self):
-        try:
-            logging.info("Data processing completed.")
-        except Exception as e:
-            raise CustomException(e, sys)
-            logging.error(f"An error occurred: {str(e)}")
+    return soliot_score, silhouette_avg

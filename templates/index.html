@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Personality Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Customer Personality Analysis</h1>
+        <div class="form-container">
+            <div class="input-group">
+                <label for="income">Income</label>
+                <input type="text" id="income">
+            </div>
+            <div class="input-group">
+                <label for="age">Age</label>
+                <input type="text" id="age">
+            </div>
+            <div class="input-group">
+                <label for="month_customer">Month of Customer</label>
+                <input type="text" id="month_customer">
+            </div>
+            <div class="input-group">
+                <label for="total_spending">Total Spending</label>
+                <input type="text" id="total_spending">
+            </div>
+            <div class="input-group">
+                <label for="children">Children</label>
+                <input type="text" id="children">
+            </div>
+            <button onclick="clearFields()">Clear</button>
+            <button onclick="predictCluster()">Submit</button>
+        </div>
+        <div class="results-container">
+            <div id="result1" class="result-box"></div>
+            <div id="result2" class="result-box"></div>
+            <div id="result3" class="result-box"></div>
+            <div id="result4" class="result-box"></div>
+            <div id="result5" class="result-box"></div>
+            <div id="result6" class="result-box"></div>
+        </div>
+        <div class="plots-container">
+            <div id="plot1" class="plot-box"></div>
+            <div id="plot2" class="plot-box"></div>
+            <div id="plot3" class="plot-box"></div>
+        </div>
+    </div>
+
+    <script>
+        function clearFields() {
+            document.getElementById('income').value = '';
+            document.getElementById('age').value = '';
+            document.getElementById('month_customer').value = '';
+            document.getElementById('total_spending').value = '';
+            document.getElementById('children').value = '';
+            document.getElementById('result1').innerText = '';
+            document.getElementById('result2').innerText = '';
+            document.getElementById('result3').innerText = '';
+            document.getElementById('result4').innerText = '';
+            document.getElementById('result5').innerText = '';
+            document.getElementById('result6').innerText = '';
+            document.getElementById('plot1').innerHTML = '';
+            document.getElementById('plot2').innerHTML = '';
+            document.getElementById('plot3').innerHTML = '';
+        }
+
+        function predictCluster() {
+            const income = document.getElementById('income').value;
+            const age = document.getElementById('age').value;
+            const month_customer = document.getElementById('month_customer').value;
+            const total_spending = document.getElementById('total_spending').value;
+            const children = document.getElementById('children').value;
+
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    income: income,
+                    age: age,
+                    month_customer: month_customer,
+                    total_spending: total_spending,
+                    children: children
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result1').innerText = `The predicted cluster is: ${data.cluster}`;
+                document.getElementById('result2').innerText = `Spendings:\n${data.details.Spendings}`;
+                document.getElementById('result3').innerText = `Product Purchase:\n${data.details['Product Purchase']}`;
+                document.getElementById('result4').innerText = `Website Use:\n${data.details['Website Use']}`;
+                document.getElementById('result5').innerText = `Campaign Response:\n${data.details['Campaign Response']}`;
+                document.getElementById('result6').innerText = `Recommended Products:\n${data.details.Recommendation}`;
+
+                document.getElementById('plot1').innerHTML = `<img src="${data.plots[0]}" alt="Plot 1" style="width:100%;">`;
+                document.getElementById('plot2').innerHTML = `<img src="${data.plots[1]}" alt="Plot 2" style="width:100%;">`;
+                document.getElementById('plot3').innerHTML = `<img src="${data.plots[2]}" alt="Plot 3" style="width:100%;">`;
+            });
+        }
+    </script>
+</body>
+</html>
