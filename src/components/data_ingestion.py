@@ -24,9 +24,6 @@ class DataIngestion:
             df = pd.read_csv(file_path)
             logging.info("Dataset Read as a Pandas dataframe")
 
-            # Drop unwanted columns
-            df.drop('unnamed: 0', axis=1, inplace=True)
-
             # Save the dataframe to a pickle file
             output_path = os.path.join('artifacts', 'raw_data.pkl')
             save_object(file_path=output_path, obj=df)
